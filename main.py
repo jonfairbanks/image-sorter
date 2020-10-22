@@ -26,32 +26,66 @@ def detect_duplicates(filename):
     try:
         img_location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', filename))
         img_duplicate = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'duplicates', filename))
-        current_hash = hashlib.sha512(Image.open(str(img_location)).tobytes()).hexdigest()
+
+        if filename.endswith('.gif'):
+            im = Image.open(img_location)
+            im.seek(0)
+            im.save("frame0.png")
+            current_hash = hashlib.sha512(Image.open("frame0.png").tobytes()).hexdigest()
+            try:
+                os.remove("frame0.png")
+            except OSError:
+                pass
+        else:
+            current_hash = hashlib.sha512(Image.open(str(img_location)).tobytes()).hexdigest()
+
         if current_hash in hashes.keys():
             shutil.move(img_location, img_duplicate)
         else: 
             hashes[current_hash] = filename
+
     except Exception as e:
+        print(f'Error Detecting Duplicate: {filename}')
         pass
 
 def detect_faces(filename):
     try:
         img_location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', filename))
         img_faces = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'faces', filename))
-        try:
-            img = cv2.imread(img_location)
-        except Exception as e:
-            raise Exception(f'File Error: {e}')
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces = faceCascade.detectMultiScale(
-            gray,
-            scaleFactor=1.5,
-            minNeighbors=1,
-            minSize=(30, 30)
-        )
-        if len(faces) > 0:
-            shutil.move(img_location, img_faces)
+        if os.path.exists(img_location):
+            if filename.endswith('.gif'):
+                im = Image.open(img_location)
+                im.seek(0)
+                im.save("frame0.png")
+                try:
+                    img = cv2.imread("frame0.png")
+                except Exception as e:
+                    raise Exception(f'File Error: {e}')
+                    return
+            else:
+                try:
+                    img = cv2.imread(img_location)
+                except Exception as e:
+                    raise Exception(f'File Error: {e}')
+                    return
+
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = faceCascade.detectMultiScale(
+                gray,
+                scaleFactor=1.5,
+                minNeighbors=1,
+                minSize=(30, 30)
+            )
+
+            if len(faces) > 0:
+                shutil.move(img_location, img_faces)
+
+            try:
+                os.remove("frame0.png")
+            except OSError:
+                pass
     except Exception as e:
+        print(f'Error Detecting Faces: {filename} {e}')
         pass
 
 def main():
