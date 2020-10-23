@@ -8,18 +8,21 @@ import shutil
 import cv2
 import numpy as np
 from tqdm import tqdm
+import re
 
 hashes = {}
+#pattern = "(?:-)(\d{4})(?=[\s])"
+pattern = '([0-9a-zA-Z]*)(\-[0-9]+)'
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
-def fix_png(filename):
+def fix_png_data(filename):
     if filename.endswith('.png'):
         try:
             img_location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', filename))
             cmd = 'pngcrush -q -ow -rem allb -reduce "' + img_location + '" > /dev/null 2>&1'
             os.system(cmd)
         except Exception as e:
-            print(f'Error Fixing PNG: {filename}')
+            print(f'Error Fixing PNG: {filename} {e}')
             pass
 
 def detect_duplicates(filename):
@@ -45,7 +48,7 @@ def detect_duplicates(filename):
             hashes[current_hash] = filename
 
     except Exception as e:
-        print(f'Error Detecting Duplicate: {filename}')
+        print(f'Error Detecting Duplicate: {filename} {e}')
         pass
 
 def detect_faces(filename):
@@ -88,16 +91,41 @@ def detect_faces(filename):
         print(f'Error Detecting Faces: {filename} {e}')
         pass
 
+def normalize_filenames(filename):
+    img_location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', filename))
+    if os.path.exists(img_location):
+        result = re.match(pattern, filename)
+        if result and result[1]:
+            ext = os.path.splitext(filename)[-1].lower()
+            newimg_location = get_nonexistant_path(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', result[1])) + ext)
+            print(f"{img_location} --> {newimg_location}")
+            os.rename(img_location, newimg_location)
+    return
+
+def get_nonexistant_path(fname_path):
+    if not os.path.exists(fname_path):
+        return fname_path
+    filename, file_extension = os.path.splitext(fname_path)
+    i = 1
+    new_fname = "{}-{}{}".format(filename, i, file_extension)
+    while os.path.exists(new_fname):
+        i += 1
+        new_fname = "{}-{}{}".format(filename, i, file_extension)
+    return new_fname
+
 def main():
     print('Searching images...\n')
 
     for filename in tqdm(sorted(os.listdir('images'))):
         if filename.endswith('.png'):
-            fix_png(filename)
+            fix_png_data(filename)
         detect_duplicates(filename)
         detect_faces(filename)
-
+        normalize_filenames(filename)
+    
+    hashes = {}
     print("\nImage processing completed!\n")
+    return
 
 if __name__ == '__main__':
     if not os.path.exists('images'):
