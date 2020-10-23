@@ -13,10 +13,16 @@ Sort Duplicate Images in Bulk
 
 ### Usage
 
-Image Sorter will analyze and sort duplicates and images with faces from the images/ directory.
+Image Sorter will analyze and sort duplicates from the images/ directory.
 
 Dependencies can be installed with pip:
 `pip3 install -r requirements.txt`
 
 The script can be ran with:
 `python3 main.py`
+
+### Options
+
+- `-f`/`--faces` = Detect images w/ faces
+- `-r`/`--rename` = Normalize Filenames (drop -1234 suffix)
+- `-v`/`--verbose` = Increase output verbosity
