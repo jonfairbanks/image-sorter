@@ -1,6 +1,8 @@
 # image-sorter
 
-Sort Duplicate Images in Bulk
+![image-sorter](https://blog.hubspot.com/hubfs/how-to-sort-in-excel.jpg)
+
+## Sort Duplicate Images in Bulk
 
 ### Requirements
 
@@ -23,6 +25,6 @@ The script can be ran with:
 
 ### Options
 
-- `-f`/`--faces` = Detect images w/ faces
-- `-r`/`--rename` = Normalize Filenames (drop -1234 suffix)
-- `-v`/`--verbose` = Increase output verbosity
+- `-f`/`--faces` - Detect images w/ faces
+- `-r`/`--rename` - Normalize Filenames (drop -1234 suffix)
+- `-v`/`--verbose` - Increase output verbosity
