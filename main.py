@@ -9,9 +9,17 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 import re
+import argparse
+
+parser = argparse.ArgumentParser(description='Sort Duplicate Images in Bulk')
+parser.add_argument("-v", "--verbose", help="Increase output verbosity", action="store_true")
+parser.add_argument("-r", "--rename", help="Normalize filenames (drop -1234 suffix)", action="store_true")
+parser.add_argument("-f", "--faces", help="Detect images w/ faces", action="store_true")
+args = parser.parse_args()
+if args.verbose:
+    print("** Verbosity: ON **\n")
 
 hashes = {}
-#pattern = "(?:-)(\d{4})(?=[\s])"
 pattern = '([0-9a-zA-Z]*)(\-[0-9]+)'
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
@@ -19,6 +27,8 @@ def fix_png_data(filename):
     if filename.endswith('.png'):
         try:
             img_location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', filename))
+            if args.verbose:
+                print(f'Fixing PNG: {filename}')
             cmd = 'pngcrush -q -ow -rem allb -reduce "' + img_location + '" > /dev/null 2>&1'
             os.system(cmd)
         except Exception as e:
@@ -43,6 +53,8 @@ def detect_duplicates(filename):
             current_hash = hashlib.sha512(Image.open(str(img_location)).tobytes()).hexdigest()
 
         if current_hash in hashes.keys():
+            if args.verbose:
+                print(f'Duplicate Found: {filename}')
             shutil.move(img_location, img_duplicate)
         else: 
             hashes[current_hash] = filename
@@ -81,6 +93,8 @@ def detect_faces(filename):
             )
 
             if len(faces) > 0:
+                if args.verbose:
+                    print(f'Detected Face(s): {filename}')
                 shutil.move(img_location, img_faces)
 
             try:
@@ -98,7 +112,8 @@ def normalize_filenames(filename):
         if result and result[1]:
             ext = os.path.splitext(filename)[-1].lower()
             newimg_location = get_nonexistant_path(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), 'images', result[1])) + ext)
-            print(f"{img_location} --> {newimg_location}")
+            if args.verbose:
+                print(f"Renaming: {img_location} --> {newimg_location}")
             os.rename(img_location, newimg_location)
     return
 
@@ -120,8 +135,10 @@ def main():
         if filename.endswith('.png'):
             fix_png_data(filename)
         detect_duplicates(filename)
-        detect_faces(filename)
-        normalize_filenames(filename)
+        if args.faces:
+            detect_faces(filename)
+        if args.rename:
+            normalize_filenames(filename)
     
     hashes = {}
     print("\nImage processing completed!\n")
