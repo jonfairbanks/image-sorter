@@ -1,6 +1,6 @@
 # image-sorter
 
-![image-sorter](https://blog.hubspot.com/hubfs/how-to-sort-in-excel.jpg)
+![image-sorter](https://miro.medium.com/max/1024/1*k-mR5gvaYYj7IB_-eNw7VQ.jpeg)
 
 ## Sort Duplicate Images in Bulk
 
