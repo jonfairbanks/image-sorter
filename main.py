@@ -42,11 +42,11 @@ def detect_duplicates(filename):
 
         if filename.endswith('.gif'):
             im = Image.open(img_location)
-            im.seek(0)
-            im.save("frame0.png")
-            current_hash = hashlib.sha512(Image.open("frame0.png").tobytes()).hexdigest()
+            im.seek(1)
+            im.save("frame1.png")
+            current_hash = hashlib.sha512(Image.open("frame1.png").tobytes()).hexdigest()
             try:
-                os.remove("frame0.png")
+                os.remove("frame1.png")
             except OSError:
                 pass
         else:
