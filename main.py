@@ -157,4 +157,10 @@ if __name__ == '__main__':
     if not os.path.exists('faces'):
         os.makedirs('faces')
 
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
